@@ -11,7 +11,7 @@ namespace dotbot.Commands
     {
         [Command("hi")]
         [Summary("says hi")]
-        public async Task SayHi([Remainder] [Summary("the stuff to say")] string echo)
+        public async Task SayHi([Remainder] [Summary("the stuff to say")] string echo = "")
         {
             await ReplyAsync($"hi friend! you said: \"{echo}\"");
         }
@@ -19,7 +19,7 @@ namespace dotbot.Commands
 
 
     // Create a module with the 'sample' prefix
-    [Group("sample")]
+    //[Group("sample")]
     public class Sample : ModuleBase<SocketCommandContext>
     {
         [Command("square")]

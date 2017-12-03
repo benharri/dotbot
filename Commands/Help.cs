@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Example.Modules
+namespace dotbot.Commands
 {
     public class HelpModule : ModuleBase<SocketCommandContext>
     {
