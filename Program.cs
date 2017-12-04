@@ -15,6 +15,7 @@ namespace dotbot
         private DiscordSocketClient _client;
         private IConfigurationRoot _config;
         private IServiceProvider _services;
+        private Random _rand;
 
         public static void Main(string[] args)
             => new Program().StartAsync().GetAwaiter().GetResult();
@@ -36,11 +37,13 @@ namespace dotbot
 
             _client.Log += Log;
 
+            _rand = new Random();
+
             _services = new ServiceCollection()
                 .AddSingleton(_client)
                 .AddSingleton(_commands)
                 .AddSingleton(_config)
-                .AddSingleton<Random>()
+                .AddSingleton(_rand)
                 .BuildServiceProvider();
 
             // install all commands from the assembly

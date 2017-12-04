@@ -1,0 +1,74 @@
+﻿using Discord.Commands;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace dotbot.Commands
+{
+    public class Misc : ModuleBase<SocketCommandContext>
+    {
+        private readonly Random _rand;
+
+        public Misc(Random rand)
+        {
+            _rand = rand;
+        }
+
+        [Command("roll")]
+        [Summary("rolls an n-sided die (defaults to 6-sided")]
+        public async Task RollDie([Summary("[number of sides]")] int sides = 6)
+        {
+            await Context.Message.DeleteAsync();
+            await ReplyAsync($"{Context.User.Mention}, you rolled a {_rand.Next(1, sides)}. (d{sides})");
+        }
+
+        [Command("rand")]
+        [Summary("gets a random number")]
+        public async Task RandomInt([Summary("max number")] int max = 100)
+        {
+            await Context.Message.DeleteAsync();
+            await ReplyAsync($"{Context.User.Mention}, your random number (between 1 and {max}) is {_rand.Next(1, max)}");
+        }
+
+        [Command("rand")]
+        [Summary("gets a random number between min and max")]
+        public async Task RandomInt([Summary("min number")] int min, [Summary("max number")] int max)
+        {
+            await Context.Message.DeleteAsync();
+            await ReplyAsync($"{Context.User.Mention}, your random number (between {min} and {max}) is {_rand.Next(min, max)}");
+        }
+
+        [Command("8ball")]
+        [Summary("ask the mighty 8-ball to determine your fortunes")]
+        public async Task Ask8Ball([Remainder] [Summary("your question for the magic 8ball")] string question)
+        {
+            var responses = new List<string>
+            {
+                "It is certain",
+                "It is decidedly so",
+                "Without a doubt",
+                "Yes definitely",
+                "You may rely on it",
+                "As I see it, yes",
+                "Most likely",
+                "Outlook good",
+                "Yes",
+                "Signs point to yes",
+                "Reply hazy try again",
+                "Ask again later",
+                "Better not tell you now",
+                "Cannot predict now",
+                "Concentrate and ask again",
+                "Don't count on it",
+                "My reply is no",
+                "My sources say no",
+                "Outlook not so good",
+                "Very doubtful",
+            };
+            await Context.Message.DeleteAsync();
+            await ReplyAsync($"{Context.User.Mention} asked: *{question}*\n\n**{responses.OrderBy(q => Guid.NewGuid()).First()}**");
+        }
+    }
+}

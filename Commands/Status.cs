@@ -1,8 +1,6 @@
 ﻿using Discord.Commands;
 using Discord.WebSocket;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace dotbot.Commands
@@ -11,7 +9,7 @@ namespace dotbot.Commands
     {
         [Command("hi")]
         [Summary("says hi")]
-        public async Task SayHi([Remainder] [Summary("the stuff to say")] string echo = "")
+        public async Task SayHi([Remainder] [Summary("the stuff to say")] string echo = ";hi")
         {
             await ReplyAsync($"hi friend! you said: \"{echo}\"");
         }

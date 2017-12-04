@@ -20,7 +20,6 @@ namespace dotbot.Commands
         [Command("help")]
         public async Task HelpAsync()
         {
-            string prefix = _config["prefix"];
             var builder = new EmbedBuilder()
             {
                 Color = new Color(114, 137, 218),
@@ -34,7 +33,7 @@ namespace dotbot.Commands
                 {
                     var result = await cmd.CheckPreconditionsAsync(Context);
                     if (result.IsSuccess)
-                        description += $"{prefix}{cmd.Aliases.First()}\n";
+                        description += $"{_config["prefix"]}{cmd.Aliases.First()}\n";
                 }
 
                 if (!string.IsNullOrWhiteSpace(description))
@@ -62,7 +61,6 @@ namespace dotbot.Commands
                 return;
             }
 
-            string prefix = _config["prefix"];
             var builder = new EmbedBuilder()
             {
                 Color = new Color(114, 137, 218),
@@ -82,7 +80,7 @@ namespace dotbot.Commands
                 });
             }
 
-            await ReplyAsync("", false, builder.Build());
+            await ReplyAsync("", embed: builder.Build());
         }
     }
 }
