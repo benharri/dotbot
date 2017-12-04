@@ -1,6 +1,7 @@
 ﻿using Discord.Commands;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace dotbot.Commands
@@ -20,10 +21,12 @@ namespace dotbot.Commands
             [Remainder] [Summary("text to convert")] string ArtString
         ) {
             if (fontName == "list") {
-                return await ReplyAsync($"available fonts for use with `{_config["prefix"]}ascii`:\n```{string.Join(", ", Directory.GetFiles("Fonts").Select(Path.GetFileNameWithoutExtension))}```");
+                await ReplyAsync($"available fonts for use with `{_config["prefix"]}ascii`:\n```{string.Join(", ", Directory.GetFiles("Fonts").ToList().Select(Path.GetFileNameWithoutExtension))}```");
             } else if (File.Exists($"Fonts/{fontName}.flf")) {
-                var font = new WenceyWang.FIGlet.FIGletFont(File.Open($"Fonts/{fontName}.flf"));
-                await ReplyAsync($"```\n{(new WenceyWang.FIGlet.AsciiArt(ArtString, font: font)).ToString()}\n```");
+                using (FileStream fs = File.OpenRead($"Fonts/{fontName}.flf")) {
+                    var font = new WenceyWang.FIGlet.FIGletFont(fs);
+                    await ReplyAsync($"```\n{(new WenceyWang.FIGlet.AsciiArt(ArtString, font: font)).ToString()}\n```");
+                }
             } else {
                 await ReplyAsync($"```\n{(new WenceyWang.FIGlet.AsciiArt(fontName + ArtString)).ToString()}\n```");
             }

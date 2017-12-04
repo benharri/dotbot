@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ namespace dotbot.Commands
             _rand = rand;
         }
 
+
         [Command("roll")]
         [Summary("rolls an n-sided die (defaults to 6-sided")]
         public async Task RollDie([Summary("[number of sides]")] int sides = 6)
@@ -23,6 +25,7 @@ namespace dotbot.Commands
             await Context.Message.DeleteAsync();
             await ReplyAsync($"{Context.User.Mention}, you rolled a {_rand.Next(1, sides)}. (d{sides})");
         }
+
 
         [Command("rand")]
         [Summary("gets a random number")]
@@ -40,10 +43,12 @@ namespace dotbot.Commands
             await ReplyAsync($"{Context.User.Mention}, your random number (between {min} and {max}) is {_rand.Next(min, max)}");
         }
 
+
         [Command("8ball")]
         [Summary("ask the mighty 8-ball to determine your fortunes")]
         public async Task Ask8Ball([Remainder] [Summary("your question for the magic 8ball")] string question)
         {
+            await Context.Message.DeleteAsync();
             var responses = new List<string>
             {
                 "It is certain",
@@ -67,8 +72,17 @@ namespace dotbot.Commands
                 "Outlook not so good",
                 "Very doubtful",
             };
-            await Context.Message.DeleteAsync();
             await ReplyAsync($"{Context.User.Mention} asked: *{question}*\n\n**{responses.OrderBy(q => Guid.NewGuid()).First()}**");
         }
+
+
+        [Command("avatar")]
+        [Summary("displays a user's profile picture")]
+        public async Task SendAvatar([Summary("user to get pfp for")] IUser mentionedUser = null)
+        {
+            var user = mentionedUser ?? Context.User;
+            await ReplyAsync($"the avatar for {user.Mention} is at {user.GetAvatarUrl(size: 1024)}");
+        }
+
     }
 }
