@@ -44,20 +44,23 @@ namespace dotbot.Services
                 var result = await _commands.ExecuteAsync(context, argPos, _provider);     // Execute the command
 
                 if (!result.IsSuccess)     // If not successful, reply with the error.
-                    await context.Channel.SendMessageAsync(result.ToString());
-            }
-            else
-            {
-                using (var db = new DotbotDbContext())
                 {
                     if (msg.HasStringPrefix(_config["prefix"], ref argPos))
                     {
-                        var key = msg.Content.Substring(_config["prefix"].Length);
-                        if (db.Defs.Any(d => d.Id == key))
-                            await context.Channel.SendMessageAsync($"**{key}**: {db.Defs.Find(key)}");
+                        using (var db = new DotbotDbContext())
+                        {
+                            var key = msg.Content.Substring(_config["prefix"].Length);
+                            if (db.Defs.Any(d => d.Id == key))
+                            {
+                                await context.Channel.SendMessageAsync($"**{key}**: {db.Defs.Find(key)}");
+                                return;
+                            }
+                        }
                     }
+                    await context.Channel.SendMessageAsync(result.ToString());
                 }
             }
+
         }
     }
 }
