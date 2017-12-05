@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using dotbot.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -11,11 +12,7 @@ namespace dotbot
 {
     public class Program
     {
-        private CommandService _commands;
-        private DiscordSocketClient _client;
         private IConfigurationRoot _config;
-        private IServiceProvider _services;
-        private Random _rand;
 
         public static void Main(string[] args)
             => new Program().StartAsync().GetAwaiter().GetResult();
@@ -26,58 +23,33 @@ namespace dotbot
                 .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile("_config.json");
             _config = builder.Build();
-            // get token from _config.json file
-            // if your bot isn't connecting, rename _config.example.json to _config.json
-            // and then place your bot token between the quotes
-            string token = _config["tokens:discord"];
-            Console.WriteLine(token);
-            
-            _client = new DiscordSocketClient();
-            _commands = new CommandService();
 
-            _client.Log += Log;
+            var services = new ServiceCollection()
+                .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
+                {
+                    LogLevel = LogSeverity.Verbose,
+                    MessageCacheSize = 1000
+                }))
+                .AddSingleton(new CommandService(new CommandServiceConfig
+                {
+                    LogLevel = LogSeverity.Verbose,
+                    DefaultRunMode = RunMode.Async
+                }))
+                .AddSingleton<CommandHandlerService>()
+                .AddSingleton<LoggingService>()
+                .AddSingleton<StartupService>()
+                .AddSingleton<CleverBotCacheService>()
+                .AddSingleton<Random>()
+                .AddSingleton(_config);
 
-            _rand = new Random();
+            var provider = services.BuildServiceProvider();
 
-            _services = new ServiceCollection()
-                .AddSingleton(_client)
-                .AddSingleton(_commands)
-                .AddSingleton(_config)
-                .AddSingleton(_rand)
-                .BuildServiceProvider();
-
-            // install all commands from the assembly
-            _client.MessageReceived += HandleCommandAsync;
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly());
-
-            await _client.LoginAsync(TokenType.Bot, token);
-            await _client.StartAsync();
+            provider.GetRequiredService<LoggingService>();
+            await provider.GetRequiredService<StartupService>().StartAsync();
+            provider.GetRequiredService<CommandHandlerService>();
 
             await Task.Delay(-1);
         }
 
-        private async Task HandleCommandAsync(SocketMessage arg)
-        {
-            var message = arg as SocketUserMessage;
-            if (message == null) return;
-
-            int argPos = 0;
-
-            if (!(message.HasStringPrefix(_config["prefix"], ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))) return;
-
-            var context = new SocketCommandContext(_client, message);
-
-            var result = await _commands.ExecuteAsync(context, argPos, _services);
-
-            if (!result.IsSuccess)
-                await context.Channel.SendMessageAsync(result.ErrorReason);
-
-        }
-
-        private Task Log(LogMessage msg)
-        {
-            Console.WriteLine(msg.ToString());
-            return Task.CompletedTask;
-        }
     }
 }

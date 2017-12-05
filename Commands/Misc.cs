@@ -23,7 +23,13 @@ namespace dotbot.Commands
         public async Task RollDie([Summary("[number of sides]")] int sides = 6)
         {
             await Context.Message.DeleteAsync();
-            await ReplyAsync($"{Context.User.Mention}, you rolled a {_rand.Next(1, sides)}. (d{sides})");
+            var embed = new EmbedBuilder()
+            {
+                Title = "Dice Roll :game_die:",
+                Color = new Color(255, 0, 0),
+                Description = $"{Context.User.Mention} rolled a {_rand.Next(1, sides)} (d{sides})"
+            };
+            await ReplyAsync("", false, embed);
         }
 
 
@@ -77,12 +83,60 @@ namespace dotbot.Commands
 
 
         [Command("avatar")]
+        [Alias("pfp", "profilepic")]
         [Summary("displays a user's profile picture")]
         public async Task SendAvatar([Summary("user to get pfp for")] IUser mentionedUser = null)
         {
             var user = mentionedUser ?? Context.User;
             await ReplyAsync($"the avatar for {user.Mention} is at {user.GetAvatarUrl(size: 1024)}");
         }
+
+
+        [Command("lenny")]
+        [Summary("you should know what this does")]
+        public async Task Lenny()
+        {
+            await ReplyAsync(@"( ͡° ͜ʖ ͡°)");
+        }
+
+
+        [Command("shrug")]
+        [Alias("meh")]
+        public async Task Shrug()
+        {
+            await ReplyAsync(@"¯\\\_(ツ)\_/¯");
+        }
+
+
+        [Command("noice")]
+        public async Task Noice()
+        {
+            await ReplyAsync(@"  
+  :ok_hand:　:joy:
+   :ok_hand::joy:
+　 :joy:
+   :joy::ok_hand:
+ :joy:　:ok_hand:
+:joy:　　:ok_hand:
+:joy:　　:ok_hand:
+ :joy:　:ok_hand:
+  :joy: :ok_hand:
+　  :ok_hand:
+　:ok_hand: :joy:
+ :ok_hand:　 :joy:
+:ok_hand:　　:joy:
+:ok_hand:　:joy:
+   :ok_hand::joy:
+　 :joy:
+   :joy::ok_hand:
+ :joy:　:ok_hand:
+:joy:　　:ok_hand:
+:joy:　　:ok_hand:
+ :joy:　:ok_hand:
+  :joy: :ok_hand:
+　  :ok_hand:");
+        }
+        
 
     }
 }

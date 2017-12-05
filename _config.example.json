@@ -1,6 +1,9 @@
 ﻿{
 	"prefix": "!",
+	"gmail_login": "",
 	"tokens": {
-		"discord": ""
+		"discord": "",
+		"cleverbot": "",
+		"gmail": ""
 	}
 }
