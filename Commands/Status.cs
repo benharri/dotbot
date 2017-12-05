@@ -35,7 +35,7 @@ namespace dotbot.Commands
             embed.AddField("Game", $"{user.Game?.ToString() ?? "not playing anything right now"}");
             embed.AddField("Joined At", $"{user.JoinedAt:f}");
 
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", embed: embed);
         }
 
 
@@ -57,7 +57,7 @@ namespace dotbot.Commands
             embed.AddField("Bot Uptime", $"{uptime:g}");
             embed.AddField("Bot Memory Usage", $"{GC.GetTotalMemory(false) / 1000} mb");
 
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", embed: embed);
         }
 
 
@@ -92,7 +92,7 @@ namespace dotbot.Commands
             );
             embed.AddField("Server ID", $"{guild.Id}");
 
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", embed: embed);
         }
 
     }

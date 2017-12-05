@@ -28,8 +28,8 @@ namespace dotbot.Commands
         }
 
 
-        [Command("b")]
-        [Alias("cleverbot", "cl")]
+        [Command("cleverbot")]
+        [Alias("bb")]
         [Summary("talk to benbot")]
         public async Task ChatWithCleverBot([Remainder] [Summary("what you want to say to benbot")] string message)
         {

@@ -21,7 +21,7 @@ namespace dotbot.Commands
 
         [Command]
         public async Task SendEmail(
-            [Summary("user to send to")] IUser recipient, 
+            [Summary("user to send to")] IUser recipient,
             [Summary("message to send")] [Remainder] string message
         ) {
             using (var db = new DotbotDbContext())
@@ -41,8 +41,8 @@ namespace dotbot.Commands
                     Credentials = new NetworkCredential(_config["gmail_login"], _config["tokens:gmail"])
                 };
                 smtp.Send(
-                    $"{Context.User.Username}-{Context.Guild.Name}@benbot.tilde.team", 
-                    db.Emails.Find(recipient.Id).EmailAddress, 
+                    $"{Context.User.Username}-{Context.Guild.Name}@benbot.tilde.team",
+                    db.Emails.Find(recipient.Id).EmailAddress,
                     $"benbot message from {Context.User.Username}",
                     message
                 );
@@ -59,14 +59,30 @@ namespace dotbot.Commands
         {
             using (var db = new DotbotDbContext())
             {
+                var id = Context.User.Id;
                 await Context.Message.DeleteAsync();
-                db.Emails.Add(new Email
-                {
-                    Id = Context.User.Id,
-                    EmailAddress = email
-                });
+                if (db.Emails.Any(e => e.Id == id))
+                    db.Emails.Find(id).EmailAddress = email;
+                else
+                    db.Emails.Add(new Email
+                    {
+                        Id = id,
+                        EmailAddress = email
+                    });
                 db.SaveChanges();
                 await ReplyAsync("your email has been saved");
+            }
+        }
+
+
+        [Command("show")]
+        [Summary("shows your saved email address")]
+        public async Task ShowEmail()
+        {
+            using (var db = new DotbotDbContext())
+            {
+                await Context.Message.DeleteAsync();
+                await ReplyAsync($"{Context.User.Mention}, your saved email is {db.Emails.Find(Context.User.Id)?.EmailAddress ?? "non existent"}");
             }
         }
 

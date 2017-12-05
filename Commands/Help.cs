@@ -3,6 +3,7 @@ using Discord.Commands;
 using Microsoft.Extensions.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace dotbot.Commands
 {
@@ -20,34 +21,30 @@ namespace dotbot.Commands
         [Command("help")]
         public async Task HelpAsync()
         {
-            var builder = new EmbedBuilder()
+            var embed = new EmbedBuilder()
             {
                 Color = new Color(114, 137, 218),
                 Description = "These are the commands you can use"
             };
 
+            var cmds = new List<string>();
             foreach (var module in _service.Modules)
             {
-                string description = null;
+                string description = "";
                 foreach (var cmd in module.Commands)
                 {
+                    if (cmds.Contains(cmd.Name)) continue;
+                    cmds.Add(cmd.Name);
                     var result = await cmd.CheckPreconditionsAsync(Context);
                     if (result.IsSuccess)
                         description += $"{_config["prefix"]}{cmd.Aliases.First()}\n";
                 }
 
                 if (!string.IsNullOrWhiteSpace(description))
-                {
-                    builder.AddField(x =>
-                    {
-                        x.Name = module.Name;
-                        x.Value = description;
-                        x.IsInline = false;
-                    });
-                }
+                    embed.AddField(module.Name, description);
             }
 
-            await ReplyAsync("", false, builder.Build());
+            await ReplyAsync("", embed: embed);
         }
 
         [Command("help")]
@@ -63,6 +60,7 @@ namespace dotbot.Commands
 
             var builder = new EmbedBuilder()
             {
+                Title = $"{Context.Client.CurrentUser.Username} Help",
                 Color = new Color(114, 137, 218),
                 Description = $"Here are some commands like **{command}**"
             };
@@ -70,14 +68,10 @@ namespace dotbot.Commands
             foreach (var match in result.Commands)
             {
                 var cmd = match.Command;
-
-                builder.AddField(x =>
-                {
-                    x.Name = string.Join(", ", cmd.Aliases);
-                    x.Value = $"Parameters: {string.Join(", ", cmd.Parameters.Select(p => p.Name))}\n" +
-                              $"Summary: {cmd.Summary}";
-                    x.IsInline = false;
-                });
+                builder.AddField(
+                    string.Join(", ", cmd.Aliases),
+                    $"Parameters: {string.Join(", ", cmd.Parameters.Select(p => p.Name))}\nSummary: {cmd.Summary}"
+                );
             }
 
             await ReplyAsync("", embed: builder.Build());

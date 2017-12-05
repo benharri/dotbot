@@ -15,7 +15,7 @@ namespace dotbot.Commands
         {
             using (var db = new DotbotDbContext())
             {
-                if (db.Defs.Any(c => c.Id == Key))
+                if (db.Defs.Any(d => d.Id == Key))
                     db.Defs.Find(Key).Def = Value;
                 else
                     db.Defs.Add(new Definition { Id = Key, Def = Value });
