@@ -52,12 +52,13 @@ namespace dotbot.Services
                             var key = msg.Content.Substring(_config["prefix"].Length);
                             if (db.Defs.Any(d => d.Id == key))
                             {
-                                await context.Channel.SendMessageAsync($"**{key}**: {db.Defs.Find(key)}");
+                                await context.Channel.SendMessageAsync($"**{key}**: {db.Defs.Find(key).Def}");
                                 return;
                             }
                         }
                     }
-                    await context.Channel.SendMessageAsync(result.ToString());
+                    if (!result.ToString().Contains("UnknownCommand"))
+                        await context.Channel.SendMessageAsync(result.ToString());
                 }
             }
 
