@@ -11,14 +11,6 @@ namespace dotbot.Commands
 {
     public class Status : ModuleBase<SocketCommandContext>
     {
-        private readonly DiscordSocketClient _client;
-
-        public Status(DiscordSocketClient client)
-        {
-            _client = client;
-        }
-
-
         [Command("userinfo")]
         [Summary("Returns info about the current user, or the user parameter, if one passed.")]
         [Alias("user", "whois")]
@@ -39,7 +31,7 @@ namespace dotbot.Commands
             };
             embed.AddField("ID", $"{user.Id}");
             embed.AddField("Status", $"{user.Status}");
-            embed.AddField("Game", $"{user.Game.ToString() ?? "not playing anything right now"}");
+            embed.AddField("Game", $"{user.Game?.ToString() ?? "not playing anything right now"}");
             embed.AddField("Joined At", $"{user.JoinedAt:f}");
 
             await ReplyAsync("", false, embed);
