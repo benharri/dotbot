@@ -11,27 +11,18 @@ namespace dotbot.Commands
 {
     public class Status : ModuleBase<SocketCommandContext>
     {
-        [Command("hi")]
-        [Summary("says hi")]
-        public async Task SayHi([Remainder] [Summary("the stuff to say")] string echo = ";hi")
-        {
-            await ReplyAsync($"hi friend! you said: \"{echo}\"");
-        }
+        private readonly DiscordSocketClient _client;
 
-
-        [Command("square")]
-        [Summary("Squares a number.")]
-        public async Task SquareAsync([Summary("The number to square.")] int num)
+        public Status(DiscordSocketClient client)
         {
-            // We can also access the channel from the Command Context.
-            await Context.Channel.SendMessageAsync($"{num}^2 = {Math.Pow(num, 2)}");
+            _client = client;
         }
 
 
         [Command("userinfo")]
         [Summary("Returns info about the current user, or the user parameter, if one passed.")]
         [Alias("user", "whois")]
-        public async Task UserInfoAsync([Summary("The (optional) user to get info for")] SocketUser infoUser = null)
+        public async Task UserInfoAsync([Summary("The (optional) user to get info for")] SocketGuildUser infoUser = null)
         {
             if (Context.IsPrivate)
             {
@@ -39,7 +30,7 @@ namespace dotbot.Commands
                 return;
             }
 
-            var user = Context.Guild.GetUser(infoUser.Id) ?? Context.Guild.CurrentUser;
+            var user = infoUser ?? Context.Guild.CurrentUser;
             var embed = new EmbedBuilder
             {
                 Title = $"User Info for {user.Mention}",
@@ -63,8 +54,8 @@ namespace dotbot.Commands
             var uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime();
             var embed = new EmbedBuilder
             {
-                Title = $"About {Context.User.Username}",
-                ThumbnailUrl = Context.User.GetAvatarUrl(),
+                Title = $"About {Context.Client.CurrentUser.Username}",
+                ThumbnailUrl = Context.Client.CurrentUser.GetAvatarUrl(),
                 Description = "Here are some of my stats",
                 Color = new Color(0, 255, 0),
             };
@@ -102,7 +93,10 @@ namespace dotbot.Commands
             embed.AddInlineField("Channel Count", $"{guild.Channels.Count}");
             embed.AddField("Created At", $"{guild.CreatedAt:f}");
             embed.AddField("Verification Level", $"{guild.VerificationLevel}");
-            embed.AddField($"{Context.User.Username} Joined At", $"{guild.CurrentUser.JoinedAt:f}");
+            embed.AddField(
+                $"{Context.Client.CurrentUser.Username} Joined At",
+                $"{Context.Guild.GetUser(Context.Client.CurrentUser.Id).JoinedAt:f}"
+            );
             embed.AddField("Server ID", $"{guild.Id}");
 
             await ReplyAsync("", false, embed);
