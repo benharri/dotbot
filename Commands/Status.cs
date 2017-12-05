@@ -13,7 +13,7 @@ namespace dotbot.Commands
     {
         [Command("userinfo")]
         [Summary("Returns info about the current user, or the user parameter, if one passed.")]
-        [Alias("user", "whois")]
+        [Alias("user", "whois", "whoami")]
         public async Task UserInfoAsync([Summary("The (optional) user to get info for")] SocketGuildUser infoUser = null)
         {
             if (Context.IsPrivate)
@@ -25,7 +25,8 @@ namespace dotbot.Commands
             var user = infoUser ?? Context.Guild.CurrentUser;
             var embed = new EmbedBuilder
             {
-                Title = $"User Info for {user.Mention}",
+                Title = "User Info",
+                Description = $"{user.Mention}",
                 ThumbnailUrl = user.GetAvatarUrl(),
                 Color = new Color(0, 0, 255),
             };
