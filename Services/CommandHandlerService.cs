@@ -42,24 +42,23 @@ namespace dotbot.Services
             if (msg.HasStringPrefix(_config["prefix"], ref argPos) || msg.HasMentionPrefix(_discord.CurrentUser, ref argPos))
             {
                 var result = await _commands.ExecuteAsync(context, argPos, _provider);     // Execute the command
+                if (result.IsSuccess) return;
 
-                if (!result.IsSuccess)     // If not successful, reply with the error.
+                if (msg.HasStringPrefix(_config["prefix"], ref argPos))
                 {
-                    if (msg.HasStringPrefix(_config["prefix"], ref argPos))
+                    using (var db = new DotbotDbContext())
                     {
-                        using (var db = new DotbotDbContext())
+                        var key = msg.Content.Substring(_config["prefix"].Length);
+                        if (db.Defs.Any(d => d.Id == key))
                         {
-                            var key = msg.Content.Substring(_config["prefix"].Length);
-                            if (db.Defs.Any(d => d.Id == key))
-                            {
-                                await context.Channel.SendMessageAsync($"**{key}**: {db.Defs.Find(key).Def}");
-                                return;
-                            }
+                            await context.Channel.SendMessageAsync($"**{key}**: {db.Defs.Find(key).Def}");
+                            return;
                         }
                     }
-                    if (!result.ToString().Contains("UnknownCommand"))
-                        await context.Channel.SendMessageAsync(result.ToString());
                 }
+                if (!result.ToString().Contains("UnknownCommand"))
+                    await context.Channel.SendMessageAsync(result.ToString());
+                
             }
 
         }
