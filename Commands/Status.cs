@@ -55,7 +55,7 @@ namespace dotbot.Commands
             embed.AddField("Server Count", $"{guilds.Count}");
             embed.AddField("User Count", $"{guilds.Sum(g => g.Users.Count)}");
             embed.AddField("Bot Uptime", $"{uptime:g}");
-            embed.AddField("Bot Memory Usage", $"{GC.GetTotalMemory(false) / 1000} mb");
+            embed.AddField("Bot Memory Usage", $"{GC.GetTotalMemory(false) / 1000000} mb");
 
             await ReplyAsync("", embed: embed);
         }
