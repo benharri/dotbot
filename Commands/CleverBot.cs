@@ -12,13 +12,13 @@ namespace dotbot.Commands
     {
         private readonly IConfigurationRoot _config;
         private Dictionary<ulong, string> _cache;
-        private string CleverBotAPIURL = "https://www.cleverbot.com/getreply";
+        private string CleverBotApiUrl = "https://www.cleverbot.com/getreply";
 
         public CleverBot(IConfigurationRoot config, CleverBotCacheService cache)
         {
             _config = config;
             _cache = cache.Cache;
-            CleverBotAPIURL += $"?key={_config["tokens:cleverbot"]}&input=";
+            CleverBotApiUrl += $"?key={_config["tokens:cleverbot"]}&input=";
         }
 
         class CleverBotResponse
@@ -33,7 +33,7 @@ namespace dotbot.Commands
         [Summary("talk to benbot")]
         public async Task ChatWithCleverBot([Remainder] [Summary("what you want to say to benbot")] string message)
         {
-            var url = $"{CleverBotAPIURL}{message}";
+            var url = $"{CleverBotApiUrl}{message}";
             if (_cache.ContainsKey(Context.Channel.Id))
                 url += $"&cs={_cache[Context.Channel.Id]}";
             var json = (new WebClient { Proxy = null }).DownloadString(url);

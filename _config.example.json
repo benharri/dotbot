@@ -1,9 +1,11 @@
 ﻿{
 	"prefix": "!",
-	"gmail_login": "",
+	"gmail_login": "user@gmail.com",
 	"tokens": {
 		"discord": "",
 		"cleverbot": "",
-		"gmail": ""
+		"gmail": "", // password here
+		"owm": "",
+		"geonames": ""
 	}
 }
