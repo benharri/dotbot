@@ -34,7 +34,7 @@ namespace dotbot.Commands
         public async Task LookupWeatherForUser([Summary("user to check time for")] IUser user)
         {
             // TODO: check if they're in DB
-            // TODO: convert to tz
+            // TODO: look up their weather
             await ReplyAsync($"it's __ weather for {user.Mention}");
         }
 
@@ -43,7 +43,7 @@ namespace dotbot.Commands
         [Summary("look up the weather at a specified location")]
         public async Task LookupWeather([Remainder] [Summary("location")] string location)
         {
-            // TODO: API lookup
+            // TODO: API lookup for location
             await ReplyAsync($"the weather in {location} is crap");
         }
 
@@ -54,7 +54,7 @@ namespace dotbot.Commands
         {
             // TODO: lookup location detail
             // TODO: save to db
-            await ReplyAsync($"you location has been saved as {location}");
+            await ReplyAsync($"your location has been saved as {location}");
         }
 
     }
