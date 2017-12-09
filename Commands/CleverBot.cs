@@ -30,7 +30,7 @@ namespace dotbot.Commands
 
         [Command("cleverbot")]
         [Alias("bb")]
-        [Summary("talk to benbot")]
+        [Summary("talk to the bot")]
         public async Task ChatWithCleverBot([Remainder] [Summary("what you want to say to benbot")] string message)
         {
             var url = $"{CleverBotApiUrl}{message}";
@@ -41,5 +41,6 @@ namespace dotbot.Commands
             _cache[Context.Channel.Id] = response.cs;
             await ReplyAsync(response.output);
         }
+
     }
 }

@@ -5,6 +5,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using System.Web;
+using NodaTime;
 
 namespace dotbot.Commands
 {
@@ -31,11 +33,9 @@ namespace dotbot.Commands
                 if (db.UserLocations.Any(u => u.Id == Context.User.Id))
                 {
                     var ul = db.UserLocations.Find(Context.User.Id);
-                    var dt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, ul.TimeZone);
-                    await ReplyAsync($"it's {dt:g} in {ul.City}");
+                    await ReplyAsync($"it's {GetTimeFromIanaId(ul.TimeZone):g} in {ul.City}");
                 }
-                else
-                    await ReplyAsync($"it's {DateTime.Now:g} Eastern Time (where the bot is hosted)");
+                else await ReplyAsync($"it's {DateTime.Now:g} Eastern Time (where the bot is hosted)\n\nyou can save your location/timezone with `{_config["prefix"]}savelocation <city>`");
             }
         }
 
@@ -48,13 +48,12 @@ namespace dotbot.Commands
             {
                 if (db.UserLocations.Any(u => u.Id == user.Id))
                 {
-                    var tz = db.UserLocations.Find(user.Id).TimeZone;
-                    var dt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, tz);
-                    await ReplyAsync($"the time for {user.Mention} is {dt:g}");
+                    var ul = db.UserLocations.Find(user.Id);
+                    await ReplyAsync($"the time for {user.Mention} in {ul.City} is {GetTimeFromIanaId(ul.TimeZone):g}");
                 }
                 else
                 {
-                    await ReplyAsync($"{user.Mention} does not have a saved location");
+                    await ReplyAsync($"{user.Mention} does not have a saved location\nit's {DateTime.Now:g} Eastern Time (US)");
                 }
             }
         }
@@ -64,35 +63,18 @@ namespace dotbot.Commands
         [Summary("check the time in an arbitrary location")]
         public async Task LookupTime([Remainder] [Summary("location")] string location)
         {
-            // TODO: api lookup
-            await ReplyAsync($"it is __ o'clock in {location}");
+            await Context.Channel.TriggerTypingAsync();
+            var owm = Utils.GetJson<Weather.OwmApiResult>($"{OwmApiUrl}&q={HttpUtility.UrlEncode(location)}");
+            var geo = Utils.GetJson<GeonamesApiResult>($"{GeoNamesUrl}&lat={owm.coord.lat}&lng={owm.coord.lon}");
+            await ReplyAsync($"it is {GetTimeFromIanaId(geo.timezoneId)} in {owm.name}");
         }
 
-        [Command("save")]
-        [Summary("save your location")]
-        public async Task SaveUserLocation([Remainder] [Summary("the location")] string location)
+
+        public class GeonamesApiResult
         {
-            using (var db = new DotbotDbContext())
-            {
-                if (db.UserLocations.Any(u => u.Id == Context.User.Id))
-                { // update existing
-                    var loc = db.UserLocations.Find(Context.User.Id);
-                    // TODO: update location for user
-                }
-                else
-                { // save new record
-
-                    // TODO: lookup location and save
-                    db.UserLocations.Add(new UserLocation
-                    {
-                        Id = Context.User.Id,
-                        // TODO: City = jsonresult
-                    });
-                }
-                db.SaveChanges();
-                await ReplyAsync($"your location has been updated to `City`");
-            }
+            public string timezoneId { get; set; }
         }
 
+        public static DateTime GetTimeFromIanaId(string tzId) => SystemClock.Instance.GetCurrentInstant().InZone(DateTimeZoneProviders.Tzdb[tzId]).ToDateTimeUnspecified();
     }
 }
