@@ -9,15 +9,13 @@ namespace dotbot.Commands
 {
     public class Location : ModuleBase<SocketCommandContext>
     {
-        private readonly IConfigurationRoot _config;
-        private string OwmApiUrl = "http://api.openweathermap.org/data/2.5/weather";
-        private string GeoNamesUrl = "http://api.geonames.org/timezoneJSON";
+        private string OwmUrl;
+        private string GeoNamesUrl;
 
         public Location(IConfigurationRoot config)
         {
-            _config = config;
-            OwmApiUrl += $"?APPID={_config["tokens:owm"]}&units=metric";
-            GeoNamesUrl += $"?username={_config["tokens:geonames"]}";
+            OwmUrl = $"{config["endpoints:owm"]}?APPID={config["tokens:owm"]}&units=metric";
+            GeoNamesUrl = $"{config["endpoints:geonames"]}?username={config["tokens:geonames"]}";
         }
 
 
@@ -25,8 +23,8 @@ namespace dotbot.Commands
         [Summary("save your location so benbot can look up your weather and timezone")]
         public async Task SaveUserLocation([Remainder] [Summary("location")] string location)
         {
-            var owm = Utils.GetJson<Weather.OwmApiResult>($"{OwmApiUrl}&q={HttpUtility.UrlEncode(location)}");
-            var geo = Utils.GetJson<Time.GeonamesApiResult>($"{GeoNamesUrl}&lat={owm.coord.lat}&lng={owm.coord.lon}");
+            var owm = Utils.GetJson<OwmApiResult>($"{OwmUrl}&q={HttpUtility.UrlEncode(location)}");
+            var geo = Utils.GetJson<GeonamesApiResult>($"{GeoNamesUrl}&lat={owm.coord.lat}&lng={owm.coord.lon}");
             using (var db = new DotbotDbContext())
             {
                 if (db.UserLocations.Any(u => u.Id == Context.User.Id))

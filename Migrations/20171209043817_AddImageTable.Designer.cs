@@ -10,9 +10,10 @@ using System;
 namespace dotbot.Migrations
 {
     [DbContext(typeof(DotbotDbContext))]
-    partial class DotbotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20171209043817_AddImageTable")]
+    partial class AddImageTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

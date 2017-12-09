@@ -13,14 +13,12 @@ namespace dotbot.Commands
     public class Weather : ModuleBase<SocketCommandContext>
     {
         private IConfigurationRoot _config;
-        private string OwmApiUrl = "http://api.openweathermap.org/data/2.5/weather";
-        private string GeoNamesUrl = "http://api.geonames.org/timezoneJSON";
+        private string OwmUrl;
 
         public Weather(IConfigurationRoot config)
         {
             _config = config;
-            OwmApiUrl += $"?APPID={_config["tokens:owm"]}&units=metric";
-            GeoNamesUrl += $"?username={_config["tokens:geonames"]}";
+            OwmUrl = $"{_config["endpoints:owm"]}?APPID={_config["tokens:owm"]}&units=metric";
         }
 
 
@@ -32,7 +30,7 @@ namespace dotbot.Commands
             {
                 if (db.UserLocations.Any(u => u.Id == Context.User.Id))
                 {
-                    var url = $"{OwmApiUrl}&id={db.UserLocations.Find(Context.User.Id).CityId}";
+                    var url = $"{OwmUrl}&id={db.UserLocations.Find(Context.User.Id).CityId}";
                     await ReplyAsync("", embed: WeatherEmbed(Utils.GetJson<OwmApiResult>(url)));
                 }
                 else await ReplyAsync($"you don't have a location saved. look one up with `{_config["prefix"]}weather <search term>` or save a location for yourself with `{_config["prefix"]}savelocation <city>`");
@@ -48,7 +46,7 @@ namespace dotbot.Commands
             {
                 if (db.UserLocations.Any(u => u.Id == user.Id))
                 {
-                    var url = $"{OwmApiUrl}&id={db.UserLocations.Find(user.Id).CityId}";
+                    var url = $"{OwmUrl}&id={db.UserLocations.Find(user.Id).CityId}";
                     await ReplyAsync("", embed: WeatherEmbed(Utils.GetJson<OwmApiResult>(url)));
                 }
                 else await ReplyAsync($"{user.Mention} doesn't have a location saved. look one up with `{_config["prefix"]}weather <search term>` or save a location for yourself with `{_config["prefix"]}savelocation <city>`");
@@ -60,52 +58,10 @@ namespace dotbot.Commands
         [Summary("look up the weather at a specified location")]
         public async Task LookupWeather([Remainder] [Summary("location")] string location)
         {
-            var url = $"{OwmApiUrl}&q={HttpUtility.UrlEncode(location)}";
+            var url = $"{OwmUrl}&q={HttpUtility.UrlEncode(location)}";
             await ReplyAsync("", embed: WeatherEmbed(Utils.GetJson<OwmApiResult>(url)));
         }
 
-
-        public class OwmApiResult
-        {
-            public int id { get; set; }
-            public string name { get; set; }
-            public class Coord
-            {
-                public double lon { get; set; }
-                public double lat { get; set; }
-            }
-            public Coord coord { get; set; }
-            public class Weather
-            {
-                public int id { get; set; }
-                public string main { get; set; }
-                public string description { get; set; }
-                public string icon { get; set; }
-            }
-            public Weather[] weather { get; set; }
-            public class WeatherMain
-            {
-                public double temp { get; set; }
-                public double pressure { get; set; }
-                public double humidity { get; set; }
-                public double temp_min { get; set; }
-                public double temp_max { get; set; }
-            }
-            public WeatherMain main { get; set; }
-            public class Wind
-            {
-                public double speed { get; set; }
-                public int deg { get; set; }
-            }
-            public Wind wind { get; set; }
-            public class Sys
-            {
-                public string country { get; set; }
-                public double sunrise { get; set; }
-                public double sunset { get; set; }
-            }
-            public Sys sys { get; set; }
-        }
 
         private Embed WeatherEmbed(OwmApiResult result)
         {
@@ -128,4 +84,47 @@ namespace dotbot.Commands
         }
 
     }
+
+    public class OwmApiResult
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public class Coord
+        {
+            public double lon { get; set; }
+            public double lat { get; set; }
+        }
+        public Coord coord { get; set; }
+        public class Weather
+        {
+            public int id { get; set; }
+            public string main { get; set; }
+            public string description { get; set; }
+            public string icon { get; set; }
+        }
+        public Weather[] weather { get; set; }
+        public class WeatherMain
+        {
+            public double temp { get; set; }
+            public double pressure { get; set; }
+            public double humidity { get; set; }
+            public double temp_min { get; set; }
+            public double temp_max { get; set; }
+        }
+        public WeatherMain main { get; set; }
+        public class Wind
+        {
+            public double speed { get; set; }
+            public int deg { get; set; }
+        }
+        public Wind wind { get; set; }
+        public class Sys
+        {
+            public string country { get; set; }
+            public double sunrise { get; set; }
+            public double sunset { get; set; }
+        }
+        public Sys sys { get; set; }
+    }
+
 }

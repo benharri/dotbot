@@ -14,15 +14,16 @@ namespace dotbot.Commands
     public class Time : ModuleBase<SocketCommandContext>
     {
         private readonly IConfigurationRoot _config;
-        private string OwmApiUrl = "http://api.openweathermap.org/data/2.5/weather";
-        private string GeoNamesUrl = "http://api.geonames.org/timezoneJSON";
+        private string OwmUrl;
+        private string GeoNamesUrl;
 
         public Time(IConfigurationRoot config)
         {
             _config = config;
-            OwmApiUrl += $"?APPID={_config["tokens:owm"]}&units=metric";
-            GeoNamesUrl += $"?username={_config["tokens:geonames"]}";
+            OwmUrl = $"{_config["endpoints:owm"]}?APPID={_config["tokens:owm"]}&units=metric";
+            GeoNamesUrl = $"{_config["endpoints:geonames"]}?username={_config["tokens:geonames"]}";
         }
+
 
         [Command]
         [Summary("get the time at your location (or bot's location if you don't have one saved)")]
@@ -33,7 +34,7 @@ namespace dotbot.Commands
                 if (db.UserLocations.Any(u => u.Id == Context.User.Id))
                 {
                     var ul = db.UserLocations.Find(Context.User.Id);
-                    await ReplyAsync($"it's {GetTimeFromIanaId(ul.TimeZone):g} in {ul.City}");
+                    await ReplyAsync($"it's {Utils.IanaIdToDateTime(ul.TimeZone):g} in {ul.City}");
                 }
                 else await ReplyAsync($"it's {DateTime.Now:g} Eastern Time (where the bot is hosted)\n\nyou can save your location/timezone with `{_config["prefix"]}savelocation <city>`");
             }
@@ -49,12 +50,9 @@ namespace dotbot.Commands
                 if (db.UserLocations.Any(u => u.Id == user.Id))
                 {
                     var ul = db.UserLocations.Find(user.Id);
-                    await ReplyAsync($"the time for {user.Mention} in {ul.City} is {GetTimeFromIanaId(ul.TimeZone):g}");
+                    await ReplyAsync($"the time for {user.Mention} in {ul.City} is {Utils.IanaIdToDateTime(ul.TimeZone):g}");
                 }
-                else
-                {
-                    await ReplyAsync($"{user.Mention} does not have a saved location\nit's {DateTime.Now:g} Eastern Time (US)");
-                }
+                else await ReplyAsync($"{user.Mention} does not have a saved location\nit's {DateTime.Now:g} Eastern Time (US)");
             }
         }
 
@@ -64,17 +62,17 @@ namespace dotbot.Commands
         public async Task LookupTime([Remainder] [Summary("location")] string location)
         {
             await Context.Channel.TriggerTypingAsync();
-            var owm = Utils.GetJson<Weather.OwmApiResult>($"{OwmApiUrl}&q={HttpUtility.UrlEncode(location)}");
+            var owm = Utils.GetJson<OwmApiResult>($"{OwmUrl}&q={HttpUtility.UrlEncode(location)}");
             var geo = Utils.GetJson<GeonamesApiResult>($"{GeoNamesUrl}&lat={owm.coord.lat}&lng={owm.coord.lon}");
-            await ReplyAsync($"it is {GetTimeFromIanaId(geo.timezoneId)} in {owm.name}");
+            await ReplyAsync($"it is {Utils.IanaIdToDateTime(geo.timezoneId)} in {owm.name}");
         }
 
-
-        public class GeonamesApiResult
-        {
-            public string timezoneId { get; set; }
-        }
-
-        public static DateTime GetTimeFromIanaId(string tzId) => SystemClock.Instance.GetCurrentInstant().InZone(DateTimeZoneProviders.Tzdb[tzId]).ToDateTimeUnspecified();
     }
+
+
+    public class GeonamesApiResult
+    {
+        public string timezoneId { get; set; }
+    }
+
 }

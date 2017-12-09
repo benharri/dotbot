@@ -7,5 +7,9 @@
 		"gmail": "", // password here
 		"owm": "",
 		"geonames": ""
+	},
+	"endpoints": {
+		"owm": "http://api.openweathermap.org/data/2.5/weather",
+		"geonames": "http://api.geonames.org/timezoneJSON"
 	}
 }
