@@ -6,13 +6,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using System.Web;
-using NodaTime;
 
 namespace dotbot.Commands
 {
     [Group("time")]
     public class Time : ModuleBase<SocketCommandContext>
     {
+        public DotbotDb db { get; set; }
         private readonly IConfigurationRoot _config;
         private string OwmUrl;
         private string GeoNamesUrl;
@@ -29,15 +29,13 @@ namespace dotbot.Commands
         [Summary("get the time at your location (or bot's location if you don't have one saved)")]
         public async Task GetTime()
         {
-            using (var db = new DotbotDbContext())
+            await Context.Channel.TriggerTypingAsync();
+            if (db.UserLocations.Any(u => u.Id == Context.User.Id))
             {
-                if (db.UserLocations.Any(u => u.Id == Context.User.Id))
-                {
-                    var ul = db.UserLocations.Find(Context.User.Id);
-                    await ReplyAsync($"it's {Utils.IanaIdToDateTime(ul.TimeZone):g} in {ul.City}");
-                }
-                else await ReplyAsync($"it's {DateTime.Now:g} Eastern Time (where the bot is hosted)\n\nyou can save your location/timezone with `{_config["prefix"]}savelocation <city>`");
+                var ul = db.UserLocations.Find(Context.User.Id);
+                await ReplyAsync($"it's {Utils.IanaIdToDateTime(ul.TimeZone):g} in {ul.City}");
             }
+            else await ReplyAsync($"it's {DateTime.Now:g} Eastern Time (where the bot is hosted)\n\nyou can save your location/timezone with `{_config["prefix"]}savelocation <city>`");
         }
 
 
@@ -45,15 +43,13 @@ namespace dotbot.Commands
         [Summary("get the time for a user (if they have a location saved)")]
         public async Task GetUserLocationTime([Summary("user to get time for")] IUser user)
         {
-            using (var db = new DotbotDbContext())
+            await Context.Channel.TriggerTypingAsync();
+            if (db.UserLocations.Any(u => u.Id == user.Id))
             {
-                if (db.UserLocations.Any(u => u.Id == user.Id))
-                {
-                    var ul = db.UserLocations.Find(user.Id);
-                    await ReplyAsync($"the time for {user.Mention} in {ul.City} is {Utils.IanaIdToDateTime(ul.TimeZone):g}");
-                }
-                else await ReplyAsync($"{user.Mention} does not have a saved location\nit's {DateTime.Now:g} Eastern Time (US)");
+                var ul = db.UserLocations.Find(user.Id);
+                await ReplyAsync($"the time for {user.Mention} in {ul.City} is {Utils.IanaIdToDateTime(ul.TimeZone):g}");
             }
+            else await ReplyAsync($"{user.Mention} does not have a saved location\nit's {DateTime.Now:g} Eastern Time (US)");
         }
 
 

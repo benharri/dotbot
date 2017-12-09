@@ -1,11 +1,11 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using dotbot.Core;
 using dotbot.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace dotbot
@@ -39,6 +39,7 @@ namespace dotbot
                 .AddSingleton<LoggingService>()
                 .AddSingleton<StartupService>()
                 .AddSingleton<CleverBotCacheService>()
+                .AddSingleton<DotbotDb>()
                 .AddSingleton<Random>()
                 .AddSingleton(_config);
 

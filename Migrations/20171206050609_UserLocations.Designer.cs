@@ -9,7 +9,7 @@ using System;
 
 namespace dotbot.Migrations
 {
-    [DbContext(typeof(DotbotDbContext))]
+    [DbContext(typeof(DotbotDb))]
     [Migration("20171206050609_UserLocations")]
     partial class UserLocations
     {

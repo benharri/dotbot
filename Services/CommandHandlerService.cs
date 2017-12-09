@@ -10,33 +10,36 @@ namespace dotbot.Services
 {
     public class CommandHandlerService
     {
+        private DotbotDb _db;
         private readonly DiscordSocketClient _discord;
         private readonly CommandService _commands;
         private readonly IConfigurationRoot _config;
         private readonly IServiceProvider _provider;
 
-        // DiscordSocketClient, CommandService, IConfigurationRoot, and IServiceProvider are injected automatically from the IServiceProvider
         public CommandHandlerService(
             DiscordSocketClient discord,
             CommandService commands,
             IConfigurationRoot config,
-            IServiceProvider provider)
-        {
+            IServiceProvider provider,
+            DotbotDb db
+        ) {
             _discord = discord;
             _commands = commands;
             _config = config;
             _provider = provider;
+            _db = db;
 
             _discord.MessageReceived += OnMessageReceivedAsync;
         }
 
         private async Task OnMessageReceivedAsync(SocketMessage s)
         {
-            var msg = s as SocketUserMessage;     // Ensure the message is from a user/bot
+            var msg = s as SocketUserMessage;
             if (msg == null) return;
-            if (msg.Author.Id == _discord.CurrentUser.Id) return;     // Ignore self when checking commands
+            // Ignore self and other bots when checking commands
+            if (msg.Author.Id == _discord.CurrentUser.Id || msg.Author.IsBot) return;     
 
-            var context = new SocketCommandContext(_discord, msg);     // Create the command context
+            var context = new SocketCommandContext(_discord, msg);
 
             int argPos = 0;     // Check if the message has a valid command prefix
             if (msg.HasStringPrefix(_config["prefix"], ref argPos) || msg.HasMentionPrefix(_discord.CurrentUser, ref argPos))
@@ -46,21 +49,25 @@ namespace dotbot.Services
 
                 if (msg.HasStringPrefix(_config["prefix"], ref argPos))
                 {
-                    using (var db = new DotbotDbContext())
+                    var key = msg.Content.Substring(_config["prefix"].Length);
+                    if (_db.Defs.Any(d => d.Id == key))
                     {
-                        var key = msg.Content.Substring(_config["prefix"].Length);
-                        if (db.Defs.Any(d => d.Id == key))
-                        {
-                            await context.Channel.SendMessageAsync($"**{key}**: {db.Defs.Find(key).Def}");
-                            return;
-                        }
+                        await context.Channel.SendMessageAsync($"**{key}**: {_db.Defs.Find(key).Def}");
+                        return;
+                    }
+                    if (_db.Images.Any(i => i.Id == key))
+                    {
+                        await context.Channel.TriggerTypingAsync();
+                        await context.Message.DeleteAsync();
+                        var img = _db.Images.Find(key);
+                        await context.Channel.SendFileAsync(img.FilePath, $"{img.Id} by {context.User.Mention}");
+                        return;
                     }
                 }
-                if (!result.ToString().Contains("UnknownCommand"))
-                    await context.Channel.SendMessageAsync(result.ToString());
-                
-            }
 
+                if (!result.IsSuccess)
+                    await context.Channel.SendMessageAsync(result.ToString());
+            }
         }
     }
 }

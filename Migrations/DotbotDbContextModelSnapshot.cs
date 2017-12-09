@@ -9,7 +9,7 @@ using System;
 
 namespace dotbot.Migrations
 {
-    [DbContext(typeof(DotbotDbContext))]
+    [DbContext(typeof(DotbotDb))]
     partial class DotbotDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

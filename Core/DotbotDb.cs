@@ -2,7 +2,7 @@
 
 namespace dotbot.Core
 {
-    public class DotbotDbContext : DbContext
+    public class DotbotDb : DbContext
     {
         public DbSet<Definition> Defs { get; set; }
         public DbSet<Email> Emails { get; set; }

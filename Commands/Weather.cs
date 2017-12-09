@@ -12,6 +12,7 @@ namespace dotbot.Commands
     [Group("weather")]
     public class Weather : ModuleBase<SocketCommandContext>
     {
+        public DotbotDb db { get; set; }
         private IConfigurationRoot _config;
         private string OwmUrl;
 
@@ -26,15 +27,13 @@ namespace dotbot.Commands
         [Summary("gets the weather for your location")]
         public async Task GetWeather()
         {
-            using (var db = new DotbotDbContext())
+            await Context.Channel.TriggerTypingAsync();
+            if (db.UserLocations.Any(u => u.Id == Context.User.Id))
             {
-                if (db.UserLocations.Any(u => u.Id == Context.User.Id))
-                {
-                    var url = $"{OwmUrl}&id={db.UserLocations.Find(Context.User.Id).CityId}";
-                    await ReplyAsync("", embed: WeatherEmbed(Utils.GetJson<OwmApiResult>(url)));
-                }
-                else await ReplyAsync($"you don't have a location saved. look one up with `{_config["prefix"]}weather <search term>` or save a location for yourself with `{_config["prefix"]}savelocation <city>`");
+                var url = $"{OwmUrl}&id={db.UserLocations.Find(Context.User.Id).CityId}";
+                await ReplyAsync("", embed: WeatherEmbed(Utils.GetJson<OwmApiResult>(url)));
             }
+            else await ReplyAsync($"you don't have a location saved. look one up with `{_config["prefix"]}weather <search term>` or save a location for yourself with `{_config["prefix"]}savelocation <city>`");
         }
 
 
@@ -42,15 +41,13 @@ namespace dotbot.Commands
         [Summary("look up the weather at a mentioned user's saved location")]
         public async Task LookupWeatherForUser([Summary("user to check time for")] IUser user)
         {
-            using (var db = new DotbotDbContext())
+            await Context.Channel.TriggerTypingAsync();
+            if (db.UserLocations.Any(u => u.Id == user.Id))
             {
-                if (db.UserLocations.Any(u => u.Id == user.Id))
-                {
-                    var url = $"{OwmUrl}&id={db.UserLocations.Find(user.Id).CityId}";
-                    await ReplyAsync("", embed: WeatherEmbed(Utils.GetJson<OwmApiResult>(url)));
-                }
-                else await ReplyAsync($"{user.Mention} doesn't have a location saved. look one up with `{_config["prefix"]}weather <search term>` or save a location for yourself with `{_config["prefix"]}savelocation <city>`");
+                var url = $"{OwmUrl}&id={db.UserLocations.Find(user.Id).CityId}";
+                await ReplyAsync("", embed: WeatherEmbed(Utils.GetJson<OwmApiResult>(url)));
             }
+            else await ReplyAsync($"{user.Mention} doesn't have a location saved. look one up with `{_config["prefix"]}weather <search term>` or save a location for yourself with `{_config["prefix"]}savelocation <city>`");
         }
 
 
@@ -58,6 +55,7 @@ namespace dotbot.Commands
         [Summary("look up the weather at a specified location")]
         public async Task LookupWeather([Remainder] [Summary("location")] string location)
         {
+            await Context.Channel.TriggerTypingAsync();
             var url = $"{OwmUrl}&q={HttpUtility.UrlEncode(location)}";
             await ReplyAsync("", embed: WeatherEmbed(Utils.GetJson<OwmApiResult>(url)));
         }
