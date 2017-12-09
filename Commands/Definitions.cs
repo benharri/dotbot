@@ -25,7 +25,7 @@ namespace dotbot.Commands
 
         [Command("get")]
         [Summary("get some text that was saved")]
-        public async Task GetDefinition([Summary("key to look for")] string Key) => await base.ReplyAsync($"**{Key}**: {db.Defs.Find(Key)?.Def ?? "not set"}");
+        public async Task GetDefinition([Summary("key to look for")] string Key) => await ReplyAsync($"**{Key}**: {db.Defs.Find(Key)?.Def ?? "not set"}");
 
 
         [Command("unset")]

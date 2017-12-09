@@ -60,12 +60,12 @@ namespace dotbot.Services
                         await context.Channel.TriggerTypingAsync();
                         await context.Message.DeleteAsync();
                         var img = _db.Images.Find(key);
-                        await context.Channel.SendFileAsync(img.FilePath, $"{img.Id} by {context.User.Mention}");
+                        await context.Channel.SendFileAsync($"UploadedImages/{img.FilePath}", $"{img.Id} by {context.User.Mention}");
                         return;
                     }
                 }
 
-                if (!result.IsSuccess)
+                if (!result.IsSuccess && result.ToString() != "UnknownCommand: Unknown command.")
                     await context.Channel.SendMessageAsync(result.ToString());
             }
         }
