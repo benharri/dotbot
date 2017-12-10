@@ -113,7 +113,7 @@ namespace dotbot.Commands
         public class Wind
         {
             public double speed { get; set; }
-            public int deg { get; set; }
+            public double deg { get; set; }
         }
         public Wind wind { get; set; }
         public class Sys

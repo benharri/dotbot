@@ -106,36 +106,5 @@ namespace dotbot.Commands
             await ReplyAsync(@"¯\\\_(ツ)\_/¯");
         }
 
-
-        [Command("noice")]
-        public async Task Noice()
-        {
-            await ReplyAsync(@"  
-  :ok_hand:　:joy:
-   :ok_hand::joy:
-　 :joy:
-   :joy::ok_hand:
- :joy:　:ok_hand:
-:joy:　　:ok_hand:
-:joy:　　:ok_hand:
- :joy:　:ok_hand:
-  :joy: :ok_hand:
-　  :ok_hand:
-　:ok_hand: :joy:
- :ok_hand:　 :joy:
-:ok_hand:　　:joy:
-:ok_hand:　:joy:
-   :ok_hand::joy:
-　 :joy:
-   :joy::ok_hand:
- :joy:　:ok_hand:
-:joy:　　:ok_hand:
-:joy:　　:ok_hand:
- :joy:　:ok_hand:
-  :joy: :ok_hand:
-　  :ok_hand:");
-        }
-        
-
     }
 }
