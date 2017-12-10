@@ -15,68 +15,63 @@ namespace dotbot.Commands
             public string Nums { get; set; }
         }
 
-        public static Dictionary<string, UnicodeFont> Fonts;
-
-        public UnicodeFonts()
+        public static Dictionary<string, UnicodeFont> Fonts = new Dictionary<string, UnicodeFont>
         {
-            Fonts = new Dictionary<string, UnicodeFont>
+            ["full"] = new UnicodeFont
             {
-                ["full"] = new UnicodeFont
-                {
-                    Uppers = "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ",
-                    Lowers = "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ",
-                    Nums = "０１２３４５６７８９",
-                },
-                ["mono"] = new UnicodeFont
-                {
-                    Uppers = "𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉",
-                    Lowers = "𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣",
-                    Nums = "𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿",
-                },
-                ["flipped"] = new UnicodeFont
-                {
-                    Uppers = "ɐqɔpǝɟƃɥıɾʞןɯuodbɹsʇn𐌡ʍxʎz",
-                    Lowers = "ɐqɔpǝɟƃɥıɾʞןɯuodbɹsʇnʌʍxʎz",
-                    Nums = "0123456789",
-                },
-                ["reversed"] = new UnicodeFont
-                {
-                    Uppers = "AdↃbƎꟻGHIJK⅃MᴎOꟼpᴙꙄTUVWXYZ",
-                    Lowers = "AdↄbɘꟻgHijklmᴎoqpᴙꙅTUvwxYz",
-                    Nums = "0߁23456789",
-                },
-                ["cyrillic"] = new UnicodeFont
-                {
-                    Uppers = "αв¢∂єƒﻭнιנкℓмησρ۹яѕтυνωχуչ",
-                    Lowers = "αв¢∂єƒﻭнιנкℓмησρ۹яѕтυνωχуչ",
-                    Nums = "0123456789",
-                },
-                ["slashed"] = new UnicodeFont
-                {
-                    Uppers = "ȺɃȻĐɆFǤĦƗɈꝀŁMNØⱣꝖɌSŦᵾVWXɎƵ",
-                    Lowers = "Ⱥƀȼđɇfǥħɨɉꝁłmnøᵽꝗɍsŧᵾvwxɏƶ",
-                    Nums = "01ƻ3456789",
-                },
-                ["script"] = new UnicodeFont
-                {
-                    Uppers = "𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩",
-                    Lowers = "𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃",
-                    Nums = "𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗",
-                },
-                ["gothic"] = new UnicodeFont
-                {
-                    Uppers = "𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅",
-                    Lowers = "𝖆𝖇𝖈𝖉𝖊𝖋𝖌𝖍𝖎𝖏𝖐𝖑𝖒𝖓𝖔𝖕𝖖𝖗𝖘𝖙𝖚𝖛𝖜𝖝𝖞𝖟",
-                    Nums = "𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡",
-                },
-                ["vaporwave"] = new UnicodeFont
-                {
-                    Uppers = "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ",
-                    Lowers = "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ",
-                    Nums = "０１２３４５６７８９",
-                },
-            };
-        }
+                Uppers = "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ",
+                Lowers = "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ",
+                Nums = "０１２３４５６７８９",
+            },
+            ["mono"] = new UnicodeFont
+            {
+                Uppers = "𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉",
+                Lowers = "𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣",
+                Nums = "𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿",
+            },
+            ["flipped"] = new UnicodeFont
+            {
+                Uppers = "ɐqɔpǝɟƃɥıɾʞןɯuodbɹsʇn𐌡ʍxʎz",
+                Lowers = "ɐqɔpǝɟƃɥıɾʞןɯuodbɹsʇnʌʍxʎz",
+                Nums = "0123456789",
+            },
+            ["reversed"] = new UnicodeFont
+            {
+                Uppers = "AdↃbƎꟻGHIJK⅃MᴎOꟼpᴙꙄTUVWXYZ",
+                Lowers = "AdↄbɘꟻgHijklmᴎoqpᴙꙅTUvwxYz",
+                Nums = "0߁23456789",
+            },
+            ["cyrillic"] = new UnicodeFont
+            {
+                Uppers = "αв¢∂єƒﻭнιנкℓмησρ۹яѕтυνωχуչ",
+                Lowers = "αв¢∂єƒﻭнιנкℓмησρ۹яѕтυνωχуչ",
+                Nums = "0123456789",
+            },
+            ["slashed"] = new UnicodeFont
+            {
+                Uppers = "ȺɃȻĐɆFǤĦƗɈꝀŁMNØⱣꝖɌSŦᵾVWXɎƵ",
+                Lowers = "Ⱥƀȼđɇfǥħɨɉꝁłmnøᵽꝗɍsŧᵾvwxɏƶ",
+                Nums = "01ƻ3456789",
+            },
+            ["script"] = new UnicodeFont
+            {
+                Uppers = "𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩",
+                Lowers = "𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃",
+                Nums = "𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗",
+            },
+            ["gothic"] = new UnicodeFont
+            {
+                Uppers = "𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅",
+                Lowers = "𝖆𝖇𝖈𝖉𝖊𝖋𝖌𝖍𝖎𝖏𝖐𝖑𝖒𝖓𝖔𝖕𝖖𝖗𝖘𝖙𝖚𝖛𝖜𝖝𝖞𝖟",
+                Nums = "𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡",
+            },
+            ["vaporwave"] = new UnicodeFont
+            {
+                Uppers = "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ",
+                Lowers = "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ",
+                Nums = "０１２３４５６７８９",
+            },
+        };
 
 
         [Command("block")]
