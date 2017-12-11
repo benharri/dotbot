@@ -4,6 +4,7 @@ using dotbot.Services;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace dotbot.Commands
 {
@@ -22,12 +23,12 @@ namespace dotbot.Commands
         [Command]
         [Priority(0)]
         [Summary("create a new poll")]
-        public async Task CreatePoll()
+        public async Task CreatePoll([Summary("poll options")] string[] options = null)
         {
             var pollId = Context.Channel.Id;
             if (_polls.ContainsKey(pollId))
             {
-                await ReplyAsync($"add some more options or start the poll with `{_config["prefix"]}poll start`");
+                await ReplyAsync($"respond with some more options or start the poll with `{_config["prefix"]}poll start`");
             }
             else
             {
@@ -35,6 +36,7 @@ namespace dotbot.Commands
                 {
                     Owner = Context.User,
                     IsOpen = false,
+                    Options = options == null ? new List<PollOption>() : options.Select(o => new PollOption{ Text = o }).ToList()
                 };
                 await ReplyAsync($"you started a new poll. respond with some options and then start the poll with `{_config["prefix"]}poll start`");
             }
@@ -51,12 +53,29 @@ namespace dotbot.Commands
             {
                 foreach (var o in _polls[pollId].Options)
                 {
-                    var opt = await ReplyAsync($"{o.Text}");
-                    await opt.AddReactionAsync(Emote.Parse(":thumbsup:"));
+                    o.Message = await ReplyAsync($"{o.Text}");
+                    await o.Message.AddReactionAsync(Emote.Parse(":thumbsup:"));
                 }
                 _polls[pollId].IsOpen = true;
             }
             else await ReplyAsync($"no poll ready to start");
+        }
+
+
+        [Command("stop")]
+        [Alias("finish", "resolve")]
+        [Priority(1)]
+        [Summary("gets winner of poll")]
+        public async Task StopPoll()
+        {
+            var pollId = Context.Channel.Id;
+            if (_polls.ContainsKey(pollId) && Context.User == _polls[pollId].Owner)
+            {
+                var poll = _polls[pollId];
+                poll.IsOpen = false;
+                await ReplyAsync($"the winner was **{poll.Winner}**\nwith {poll.Winner.Votes} votes");
+            }
+            else await ReplyAsync("you haven't started any polls");
         }
 
     }

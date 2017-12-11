@@ -20,13 +20,15 @@ namespace dotbot.Services
         public bool IsOpen { get; set; }
         public IUser Owner { get; set; }
 
-        public PollOption GetWinner => Options.OrderBy(o => o.Votes).Last();
+        public PollOption Winner => Options.OrderBy(o => o.Votes).Last();
 
     }
 
     public class PollOption
     {
         public string Text { get; set; }
-        public int Votes { get; set; }
+        public IUserMessage Message { get; set; }
+        public int Votes => Message.Reactions.Count;
+        public override string ToString() => Text;
     }
 }
