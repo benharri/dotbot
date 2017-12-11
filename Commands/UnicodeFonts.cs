@@ -1,6 +1,7 @@
 ﻿using Discord.Commands;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +14,19 @@ namespace dotbot.Commands
             public string Uppers { get; set; }
             public string Lowers { get; set; }
             public string Nums { get; set; }
+
+            internal string ConvertChar(char c)
+            {
+                if (c >= '0' && c <= '9')
+                    return $"{Nums[c - '0']} ";
+                else if (c >= 'a' && c <= 'z')
+                    return $"{Lowers[c - 'a']} ";
+                else if (c >= 'A' && c <= 'Z')
+                    return $"{Uppers[c - 'z']} ";
+                return "";
+            }
+
+            internal string Convert(string msgtext) => string.Join("", msgtext.ToCharArray().Select(c => ConvertChar(c)));
         }
 
         public static Dictionary<string, UnicodeFont> Fonts = new Dictionary<string, UnicodeFont>
@@ -79,12 +93,7 @@ namespace dotbot.Commands
         public async Task BlockText([Remainder] string text)
         {
             var Nums = new string[] { ":zero:", ":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:", ":nine:" };
-            var res = new StringBuilder();
-            foreach (var c in text.ToCharArray())
-            {
-                res.Append(Char.IsDigit(c) ? $"{Nums[c - '0']} " : Char.IsLetter(c) ? $":regional_indicator_{c.ToString().ToLower()}: " : "");
-            }
-            await ReplyAsync(res.ToString());
+            await ReplyAsync(string.Join("", text.ToCharArray().Select(c => Char.IsDigit(c) ? $"{Nums[c - '0']} " : Char.IsLetter(c) ? $":regional_indicator_{Char.ToLower(c)}: " : "")));
         }
 
 
@@ -93,28 +102,6 @@ namespace dotbot.Commands
         public async Task ListFonts()
         {
             await base.ReplyAsync($"here are the available unicode fonts:```{string.Join(", ", Fonts.Keys)}```");
-        }
-
-
-        public static string ConvertFont(string fontName, string message)
-        {
-            var res = new StringBuilder();
-            foreach (var c in message.ToCharArray())
-            {
-                switch (c)
-                {
-                    case char n when (c >= '0' && c <= '9'):
-                        res.Append($"{Fonts[fontName].Nums[n - '0']} ");
-                        break;
-                    case char n when (c >= 'a' && c <= 'z'):
-                        res.Append($"{Fonts[fontName].Lowers[n - 'a']} ");
-                        break;
-                    case char n when (c >= 'A' && c <= 'Z'):
-                        res.Append($"{Fonts[fontName].Uppers[n - 'z']} ");
-                        break;
-                }
-            }
-            return res.ToString();
         }
 
     }

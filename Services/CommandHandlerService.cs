@@ -70,12 +70,9 @@ namespace dotbot.Services
                         var img = _db.Images.Find(key);
                         await context.Channel.SendFileAsync($"UploadedImages/{img.FilePath}", $"{img.Id} by {context.User.Mention}");
                     }
-                    else if (UnicodeFonts.Fonts.Any(f => f.Key == key))
+                    else if (UnicodeFonts.Fonts.ContainsKey(key))
                     { // convert font
-                        Console.WriteLine(key);
-                        var msgtext = msg.Content.Substring(msg.Content.IndexOf(" "));
-                        Console.WriteLine(msgtext);
-                        await context.Channel.SendMessageAsync(UnicodeFonts.ConvertFont(key, msgtext));
+                        await context.Channel.SendMessageAsync(UnicodeFonts.Fonts[key].Convert(msg.Content.Substring(msg.Content.IndexOf(" ") + 1)));
                     }
                 }
             }
