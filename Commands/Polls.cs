@@ -75,6 +75,7 @@ namespace dotbot.Commands
                 var poll = _polls[pollId];
                 poll.IsOpen = false;
                 await ReplyAsync($"the winner was **{poll.Winner}**\nwith {poll.Winner.Votes} votes");
+                poll = null;
             }
             else await ReplyAsync("you haven't started any polls");
         }
