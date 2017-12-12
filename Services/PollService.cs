@@ -9,33 +9,25 @@ namespace dotbot.Services
 {
     public class PollService
     {
-        private readonly DiscordSocketClient _discord;
+        private readonly DiscordSocketClient ;
         public Dictionary<ulong, Poll> currentPolls;
 
         public PollService(DiscordSocketClient discord)
         {
             currentPolls = new Dictionary<ulong, Poll>();
-            _discord = discord;
 
-            _discord.ReactionAdded += OnReactionAddedAsync;
+            discord.ReactionAdded += OnReactionAddedAsync;
         }
 
         private Task OnReactionAddedAsync(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel Channel, SocketReaction Reaction)
         {
             if (currentPolls.ContainsKey(Channel.Id))
             {
-                currentPolls[Channel.Id].Options.First(o => o.Message.Id == CachedMessage.Id).Message = CachedMessage.Value;
+                currentPolls[Channel.Id].Options.First(o => o.Message.Id == CachedMessage.Id).Votes++;
             }
-            Console.WriteLine(CachedMessage.Value.Reactions.Count);
-
+            Console.WriteLine($"{Reaction.Emote} reaction added to {CachedMessage.Id} in {Channel.Name}");
             return Task.CompletedTask;
         }
-
-        //var msg = s as SocketUserMessage;
-        //if (msg == null) return;
-        //var context = new SocketCommandContext(_discord, msg);
-        //if (!currentPolls.ContainsKey(context.Channel.Id)) return;
-
 
     }
 
@@ -46,14 +38,14 @@ namespace dotbot.Services
         public List<PollOption> Options { get; set; }
         public bool IsOpen { get; set; }
         public IUser Owner { get; set; }
-        public PollOption Winner => Options.OrderBy(o => o.Votes).First();
+        public PollOption Winner => Options.OrderBy(o => o.Votes).Last();
     }
 
     public class PollOption
     {
         public string Text { get; set; }
         public IUserMessage Message { get; set; }
-        public int Votes => Message.Reactions.Count;
+        public int Votes { get; set; }
         public override string ToString() => Text;
     }
 }
