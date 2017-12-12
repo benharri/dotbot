@@ -49,13 +49,20 @@ namespace dotbot.Commands
         public async Task StartPoll()
         {
             var pollId = Context.Channel.Id;
-            if (_polls.ContainsKey(pollId) && Context.User == _polls[pollId].Owner)
+            if (_polls.ContainsKey(pollId) && Context.User == _polls[pollId].Owner && !_polls[pollId].IsOpen)
             {
-                foreach (var o in _polls[pollId].Options)
+                if (_polls[pollId].IsOpen)
                 {
-                    o.Message = await ReplyAsync($"{o.Text}");
-                    await o.Message.AddReactionAsync(new Emoji("👍"));
-                    await Task.Delay(100);
+                    await ReplyAsync("poll already started");
+                    return;
+                }
+
+                foreach (var opt in _polls[pollId].Options)
+                {
+                    var msg = await ReplyAsync($"{opt.Text}");
+                    await msg.AddReactionAsync(new Emoji("👍"));
+                    opt.MessageId = msg.Id;
+                    await Task.Delay(300);
                 }
                 _polls[pollId].IsOpen = true;
             }
@@ -70,12 +77,11 @@ namespace dotbot.Commands
         public async Task StopPoll()
         {
             var pollId = Context.Channel.Id;
-            if (_polls.ContainsKey(pollId) && Context.User == _polls[pollId].Owner)
+            if (_polls.ContainsKey(pollId) && Context.User == _polls[pollId].Owner && _polls[pollId].IsOpen)
             {
-                var poll = _polls[pollId];
-                poll.IsOpen = false;
-                await ReplyAsync($"the winner was **{poll.Winner}**\nwith {poll.Winner.Votes} votes");
-                poll = null;
+                _polls[pollId].IsOpen = false;
+                await base.ReplyAsync($"the winner was **{_polls[pollId].Winner}**\nwith {_polls[pollId].Winner.Votes} votes");
+                _polls.Remove(pollId);
             }
             else await ReplyAsync("you haven't started any polls");
         }
