@@ -9,7 +9,6 @@ namespace dotbot.Services
 {
     public class PollService
     {
-        private readonly DiscordSocketClient ;
         public Dictionary<ulong, Poll> currentPolls;
 
         public PollService(DiscordSocketClient discord)
