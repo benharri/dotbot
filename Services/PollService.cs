@@ -9,6 +9,7 @@ namespace dotbot.Services
 {
     public class PollService
     {
+        private readonly ulong _selfId;
         public Dictionary<ulong, Poll> currentPolls;
 
         public PollService(DiscordSocketClient discord)
@@ -16,15 +17,13 @@ namespace dotbot.Services
             currentPolls = new Dictionary<ulong, Poll>();
 
             discord.ReactionAdded += OnReactionAddedAsync;
+            _selfId = discord.CurrentUser.Id;
         }
 
         private Task OnReactionAddedAsync(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel Channel, SocketReaction Reaction)
         {
-            if (currentPolls.ContainsKey(Channel.Id))
-            {
-                currentPolls[Channel.Id].Options.First(o => o.MessageId == CachedMessage.Id).Votes++;
-            }
-            // Console.WriteLine($"{Reaction.Emote} reaction added to {CachedMessage.Id} in {Channel.Name}");
+            if (currentPolls.ContainsKey(Channel.Id) && Reaction.UserId != _selfId)
+                currentPolls[Channel.Id].Options.First(o => o.MessageId == Reaction.MessageId).Votes++;
             return Task.CompletedTask;
         }
 
