@@ -27,9 +27,7 @@ namespace dotbot.Commands
         {
             var pollId = Context.Channel.Id;
             if (_polls.ContainsKey(pollId))
-            {
                 await ReplyAsync($"respond with some more options or start the poll with `{_config["prefix"]}poll start`");
-            }
             else
             {
                 _polls[pollId] = new Poll

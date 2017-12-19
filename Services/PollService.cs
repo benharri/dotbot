@@ -9,20 +9,20 @@ namespace dotbot.Services
 {
     public class PollService
     {
-        private readonly ulong _selfId;
+        private DiscordSocketClient _discord;
         public Dictionary<ulong, Poll> currentPolls;
 
         public PollService(DiscordSocketClient discord)
         {
             currentPolls = new Dictionary<ulong, Poll>();
 
-            discord.ReactionAdded += OnReactionAddedAsync;
-            _selfId = discord.CurrentUser.Id;
+            _discord = discord;
+            _discord.ReactionAdded += OnReactionAddedAsync;
         }
 
         private Task OnReactionAddedAsync(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel Channel, SocketReaction Reaction)
         {
-            if (currentPolls.ContainsKey(Channel.Id) && Reaction.UserId != _selfId)
+            if (currentPolls.ContainsKey(Channel.Id) && Reaction.UserId != _discord.CurrentUser.Id)
                 currentPolls[Channel.Id].Options.First(o => o.MessageId == Reaction.MessageId).Votes++;
             return Task.CompletedTask;
         }
