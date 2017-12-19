@@ -41,6 +41,7 @@ namespace dotbot
                 .AddSingleton<CleverBotCacheService>()
                 .AddSingleton<DotbotDb>()
                 .AddSingleton<PollService>()
+                .AddSingleton<HangmanService>()
                 .AddSingleton<Random>()
                 .AddSingleton(_config);
 

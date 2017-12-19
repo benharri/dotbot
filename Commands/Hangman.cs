@@ -1,4 +1,5 @@
 ﻿using Discord.Commands;
+using dotbot.Services;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,15 +11,22 @@ namespace dotbot.Commands
     public class Hangman : ModuleBase<SocketCommandContext>
     {
         static internal string[] Gallows = File.ReadAllText("gallows.txt").Split('=');
-        public HangmanSession CurrentGames;
+        public Dictionary<ulong, HangmanSession> _games;
+
+
+        public Hangman(HangmanService hangman)
+        {
+            _games = hangman._activeGames;
+        }
 
         [Command]
         [Priority(0)]
         [Summary("start a game of hangman!")]
         public async Task StartGame([Remainder] string secret)
         {
-            CurrentGames = new HangmanSession(secret);
-            await ReplyAsync($"{CurrentGames}");
+            var gameId = Context.Channel.Id;
+            _games.Add(gameId, new HangmanSession(secret));
+            await ReplyAsync($"{_games[gameId]}");
         }
     }
 
