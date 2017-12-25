@@ -17,6 +17,7 @@ namespace dotbot.Services
         private readonly CommandService _commands;
         private readonly IConfigurationRoot _config;
         private readonly IServiceProvider _provider;
+        private readonly HangmanService _hangman;
         private Dictionary<ulong, Poll> _polls;
 
         public CommandHandlerService(
@@ -25,7 +26,8 @@ namespace dotbot.Services
             IConfigurationRoot config,
             IServiceProvider provider,
             DotbotDb db,
-            PollService polls
+            PollService polls,
+            HangmanService hangman
         ) {
             _discord = discord;
             _commands = commands;
@@ -33,6 +35,7 @@ namespace dotbot.Services
             _provider = provider;
             _db = db;
             _polls = polls.currentPolls;
+            _hangman = hangman;
 
             _discord.MessageReceived += OnMessageReceivedAsync;
         }
@@ -77,12 +80,38 @@ namespace dotbot.Services
                 }
             }
             else
-            { // add poll options 
+            { 
+                // add poll options 
                 var id = context.Channel.Id;
                 if (_polls.ContainsKey(id) && _polls[id].Owner == context.User && !_polls[id].IsOpen)
                 {
                     _polls[id].Options.Add(new PollOption { Text = msg.Content });
                     await context.Channel.SendMessageAsync($"{msg.Content} added!");
+                }
+
+                // handle hangman guess
+                if (_hangman._activeGames.ContainsKey(id))
+                {
+                    var game = _hangman._activeGames[id];
+                    if (msg.Content.Length != 1)
+                    {
+                        await context.Channel.SendMessageAsync($"send one letter at a time.\n\n{game}");
+                        return;
+                    }
+
+                    if (game.Guess(msg.Content[0]))
+                    { // proper guess
+                        if (game.GameOver)
+                        {
+                            await context.Channel.SendMessageAsync($"game over!\n\n{game}");
+                            return;
+                        }
+                        await context.Channel.SendMessageAsync($"{msg.Content[0]} guessed:\n\n{game}");
+                    }
+                    else
+                    {
+                        await context.Channel.SendMessageAsync($"letter already guessed... try again!\n\n{game}");
+                    }
                 }
             }
         }
