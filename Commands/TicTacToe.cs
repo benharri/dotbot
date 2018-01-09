@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using System;
+using Discord.WebSocket;
 
 namespace dotbot.Commands
 {
@@ -25,7 +27,10 @@ namespace dotbot.Commands
         public async Task StartGame([Summary("mention whom you would like to play with!")] IUser opponent)
         {
             var gameId = Context.Channel.Id;
-            _games.Add(gameId, new TicTacToeSession(opponent));
+            _games.Add(gameId, new TicTacToeSession(Context.User, opponent)
+            {
+                LastMessage = Context.Message
+            });
             await ReplyAsync($"{_games[gameId]}");
         }
 
@@ -52,15 +57,91 @@ namespace dotbot.Commands
 
     public class TicTacToeSession
     {
+        public bool Active;
+        public bool Tied;
+        public Dictionary<string, ulong> Players;
+        public string Turn;
+        public string[][] Board;
+        public IMessage LastMessage;
 
-        public TicTacToeSession(IUser opponent)
+        public TicTacToeSession(IUser player, IUser opponent)
         {
-
+            Board = new string[][] {
+                new string[] { ":one:", ":two:", ":three" },
+                new string[] { ":four:", ":five:", ":six:" },
+                new string[] { ":seven:", ":eight:", ":nine:" }
+            };
+            Players[":x:"] = player.Id;
+            Players[":o:"] = opponent.Id;
+            Turn = ":x:";
+            Active = true;
+            Tied = false;
         }
 
 
-        public override string ToString()
-            => $"tictactoe";
+        public string GetPiece(int i) => Board[(i - 1) / 3][(i - 1) % 3];
+        public bool PutPiece(int i, string piece)
+        {
+            if (GetPiece(i) == ":x:" || GetPiece(i) == ":o:") return false;
+            Board[(i - 1) / 3][(i - 1) % 3] = piece;
+            return true;
+        }
+
+        internal string DoMove(SocketUserMessage msg)
+        {
+            int move;
+            if (Int32.TryParse(msg.Content, out move))
+                if (move > 0 && move < 10)
+                    if (!PutPiece(move, Turn))
+                        return $"unable to place your piece. position **{move}** already occupied by {GetPiece(move)}";
+                    else
+                    {
+                        if (CheckWin())
+                        {
+                            Active = false;
+                            return $"<@{Players[Turn]}> ({Turn}) won!";
+                        }
+                        else if (Tied)
+                        {
+                            Active = false;
+                            return "it's a tie. game over.";
+                        }
+                        else
+                        {
+                            Turn = Turn == ":x:" ? ":o:" : ":x:";
+                            return $"";
+                        }
+                    }
+                else
+                    return $"**{msg.Content}** is not a valid move. please enter a number between 1 and 9.";
+            else
+                return "your move wasn't even a number...";
+        }
+
+
+        internal bool CheckWin()
+        {
+            if ((GetPiece(1) == GetPiece(4) && GetPiece(4) == GetPiece(7))
+             || (GetPiece(2) == GetPiece(5) && GetPiece(5) == GetPiece(8))
+             || (GetPiece(3) == GetPiece(6) && GetPiece(6) == GetPiece(9))
+             || (GetPiece(1) == GetPiece(2) && GetPiece(2) == GetPiece(3))
+             || (GetPiece(4) == GetPiece(5) && GetPiece(5) == GetPiece(6))
+             || (GetPiece(7) == GetPiece(8) && GetPiece(8) == GetPiece(9))
+             || (GetPiece(1) == GetPiece(5) && GetPiece(5) == GetPiece(9))
+             || (GetPiece(3) == GetPiece(5) && GetPiece(5) == GetPiece(7))
+            ) return true;
+            else
+            {
+                if (Enumerable.Range(1, 9).All(i => GetPiece(i) == ":o:" || GetPiece(i) == ":x:"))
+                {
+                    Tied = true;
+                    Active = false;
+                }
+                return false;
+            }
+        }
+
+        public override string ToString() => $"{string.Join("\n", Board.Select(r => $"{string.Join(" ", r)}"))}\n<@{Turn}>'s turn";
 
     }
 }

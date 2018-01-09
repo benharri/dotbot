@@ -2,6 +2,7 @@ using Discord.WebSocket;
 using dotbot.Commands;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 using Discord.Commands;
 using System.Threading.Tasks;
 
@@ -22,10 +23,16 @@ namespace dotbot.Services
         {
             var id = context.Channel.Id;
 
+
+
             if (_activeGames.ContainsKey(id))
             {
                 var game = _activeGames[id];
-                await context.Channel.SendMessageAsync("tictactoe move");
+                if (!game.Active || game.Players[game.Turn] != msg.Author.Id) return;
+                await msg.DeleteAsync();
+                await game.LastMessage.DeleteAsync();
+                await context.Channel.SendMessageAsync($"{game.DoMove(msg)}\n\n{game}");
+                game.LastMessage = msg;
             }
         }
 
