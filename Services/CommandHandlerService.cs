@@ -18,6 +18,7 @@ namespace dotbot.Services
         private readonly IConfigurationRoot _config;
         private readonly IServiceProvider _provider;
         private readonly HangmanService _hangman;
+        private readonly TicTacToeService _tic;
         private Dictionary<ulong, Poll> _polls;
 
         public CommandHandlerService(
@@ -27,8 +28,10 @@ namespace dotbot.Services
             IServiceProvider provider,
             DotbotDb db,
             PollService polls,
-            HangmanService hangman
-        ) {
+            HangmanService hangman,
+            TicTacToeService tic
+        )
+        {
             _discord = discord;
             _commands = commands;
             _config = config;
@@ -36,6 +39,7 @@ namespace dotbot.Services
             _db = db;
             _polls = polls.currentPolls;
             _hangman = hangman;
+            _tic = tic;
 
             _discord.MessageReceived += OnMessageReceivedAsync;
         }
@@ -45,7 +49,7 @@ namespace dotbot.Services
             var msg = s as SocketUserMessage;
             if (msg == null) return;
             // Ignore self and other bots when checking commands
-            if (msg.Author.Id == _discord.CurrentUser.Id || msg.Author.IsBot) return;     
+            if (msg.Author.Id == _discord.CurrentUser.Id || msg.Author.IsBot) return;
 
             var context = new SocketCommandContext(_discord, msg);
 
@@ -61,7 +65,7 @@ namespace dotbot.Services
                 if (msg.HasStringPrefix(_config["prefix"], ref argPos))
                 { // check for other conditions
                     var key = msg.Content.Substring(_config["prefix"].Length).Split(' ').First();
-                    
+
                     if (_db.Defs.Any(d => d.Id == key))
                     { // get def
                         await context.Channel.SendMessageAsync($"**{key}**: {_db.Defs.Find(key).Def}");
@@ -70,8 +74,7 @@ namespace dotbot.Services
                     { // get img
                         await context.Channel.TriggerTypingAsync();
                         await context.Message.DeleteAsync();
-                        var img = _db.Images.Find(key);
-                        await context.Channel.SendFileAsync($"UploadedImages/{img.FilePath}", $"{img.Id} by {context.User.Mention}");
+                        await context.Channel.SendFileAsync($"UploadedImages/{_db.Images.Find(key).FilePath}", $"{key} by {context.User.Mention}");
                     }
                     else if (UnicodeFonts.Fonts.ContainsKey(key))
                     { // convert font
@@ -80,8 +83,8 @@ namespace dotbot.Services
                 }
             }
             else
-            { 
-                // add poll options 
+            {
+                // add poll options
                 var id = context.Channel.Id;
                 if (_polls.ContainsKey(id) && _polls[id].Owner == context.User && !_polls[id].IsOpen)
                 {
@@ -90,29 +93,11 @@ namespace dotbot.Services
                 }
 
                 // handle hangman guess
-                if (_hangman._activeGames.ContainsKey(id))
-                {
-                    var game = _hangman._activeGames[id];
-                    if (msg.Content.Length != 1)
-                    {
-                        await context.Channel.SendMessageAsync($"send one letter at a time.\n\n{game}");
-                        return;
-                    }
+                await _hangman.HandleMove(msg, context);
 
-                    if (game.Guess(msg.Content[0]))
-                    { // proper guess
-                        if (game.GameOver)
-                        {
-                            await context.Channel.SendMessageAsync($"game over!\n\n{game}");
-                            return;
-                        }
-                        await context.Channel.SendMessageAsync($"{msg.Content[0]} guessed:\n\n{game}");
-                    }
-                    else
-                    {
-                        await context.Channel.SendMessageAsync($"letter already guessed... try again!\n\n{game}");
-                    }
-                }
+                // handle tictactoe games
+                await _tic.HandleMove(msg, context);
+
             }
         }
     }

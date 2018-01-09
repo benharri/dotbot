@@ -42,6 +42,7 @@ namespace dotbot
                 .AddSingleton<DotbotDb>()
                 .AddSingleton<PollService>()
                 .AddSingleton<HangmanService>()
+                .AddSingleton<TicTacToeService>()
                 .AddSingleton<Random>()
                 .AddSingleton(_config);
 

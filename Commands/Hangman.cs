@@ -24,9 +24,9 @@ namespace dotbot.Commands
         [Summary("start a game of hangman!")]
         public async Task StartGame([Remainder] string secret)
         {
+            await Context.Message.DeleteAsync();
             var gameId = Context.Channel.Id;
             _games.Add(gameId, new HangmanSession(secret));
-            await Context.Message.DeleteAsync();
             await ReplyAsync($"{_games[gameId]}");
         }
 
@@ -41,11 +41,11 @@ namespace dotbot.Commands
             {
                 var game = _games[gameId];
                 _games.Remove(gameId);
-                await ReplyAsync($"game stopped. the secret word was {game.SecretWord}");
+                await ReplyAsync($"game over. the secret word was {game.SecretWord}");
             }
             else
             {
-                await ReplyAsync($"no game started in this channel...");
+                await ReplyAsync("no game running in this channel...");
             }
         }
     }
@@ -54,10 +54,15 @@ namespace dotbot.Commands
     public class HangmanSession
     {
         internal string SecretWord;
-        internal IEnumerable<char> SecretWordLetters => SecretWord.ToCharArray().Distinct().OrderBy(a => a);
+        internal IEnumerable<char> SecretWordLetters
+            => SecretWord.ToCharArray().Distinct().OrderBy(a => a);
+        public string ShowSecretWord
+            => $"Word: {string.Join("", SecretWord.ToCharArray().Select(c => $"{(GuessedLetters.Contains(c) ? c : c == ' ' ? ' ' : '_')} "))}";
         internal List<char> GuessedLetters;
         private int Guesses;
-        public bool GameOver => SecretWordLetters.SequenceEqual(GuessedLetters.OrderBy(c => c)) && Guesses >= Hangman.Gallows.Length;
+        public bool GameOver
+            => SecretWordLetters.SequenceEqual(GuessedLetters.OrderBy(c => c))
+            || Guesses >= Hangman.Gallows.Length;
 
         public HangmanSession(string secretWord)
         {
@@ -74,18 +79,12 @@ namespace dotbot.Commands
             if (!SecretWordLetters.Contains(guess)) Guesses++;
             return true;
         }
-        
+
 
         public override string ToString()
-        {
-            var Incorrects = GuessedLetters.Except(SecretWordLetters);
-            return $"```{Hangman.Gallows[Guesses]}\n{ShowSecretWord()}\n\nGuessed Letters: {string.Join(' ', GuessedLetters)}\nIncorrect Letters: {string.Join(' ', Incorrects)}```";
-        }
+            => $"```{Hangman.Gallows[Guesses]}\n{ShowSecretWord}\n\n"
+             + $"Guessed Letters: {string.Join(' ', GuessedLetters)}\n"
+             + $"Incorrect Letters: {string.Join(' ', GuessedLetters.Except(SecretWordLetters))}```";
 
-        public string ShowSecretWord()
-        {
-            var disp = SecretWord.ToCharArray().Select(c => $"{(GuessedLetters.Contains(c) ? c : '_')} ");
-            return $"Word: {string.Join("", disp)}";
-        }
     }
 }
