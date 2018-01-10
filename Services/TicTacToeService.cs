@@ -23,16 +23,10 @@ namespace dotbot.Services
         {
             var id = context.Channel.Id;
 
-
-
             if (_activeGames.ContainsKey(id))
             {
                 var game = _activeGames[id];
-                if (!game.Active || game.Players[game.Turn] != msg.Author.Id) return;
-                await msg.DeleteAsync();
-                await game.LastMessage.DeleteAsync();
                 await context.Channel.SendMessageAsync($"{game.DoMove(msg)}\n\n{game}");
-                game.LastMessage = msg;
             }
         }
 

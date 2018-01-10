@@ -31,6 +31,7 @@ namespace dotbot.Services
                 throw new Exception("Please enter your bot's token into the `_config.json` file found in the applications root directory.");
 
             await _discord.LoginAsync(TokenType.Bot, token);
+            Console.WriteLine(token);
             await _discord.StartAsync();
 
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly());

@@ -88,14 +88,19 @@ namespace dotbot.Commands
             return true;
         }
 
-        internal string DoMove(SocketUserMessage msg)
+        internal async string DoMove(SocketUserMessage msg)
         {
+            if (!Active || Players[Turn] != msg.Author.Id) return "";
+
+            await LastMessage.DeleteAsync();
+            LastMessage = msg;
+            await msg.DeleteAsync();
+
             if (Int32.TryParse(msg.Content, out var move))
                 if (move > 0 && move < 10)
                     if (!PutPiece(move, Turn))
                         return $"unable to place your piece. position **{move}** already occupied by {GetPiece(move)}";
                     else
-                    {
                         if (CheckWin())
                         {
                             Active = false;
@@ -110,8 +115,7 @@ namespace dotbot.Commands
                         {
                             Turn = Turn == ":x:" ? ":o:" : ":x:";
                             return $"";
-                        }
-                    }
+                       }
                 else return $"**{msg.Content}** is not a valid move. please enter a number between 1 and 9.";
             else return "your move wasn't even a number... try again!";
         }
