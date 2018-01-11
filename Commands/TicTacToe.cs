@@ -88,7 +88,7 @@ namespace dotbot.Commands
             return true;
         }
 
-        internal async string DoMove(SocketUserMessage msg)
+        internal async Task<string> DoMove(SocketUserMessage msg)
         {
             if (!Active || Players[Turn] != msg.Author.Id) return "";
 

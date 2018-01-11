@@ -26,7 +26,7 @@ namespace dotbot.Services
             if (_activeGames.ContainsKey(id))
             {
                 var game = _activeGames[id];
-                await context.Channel.SendMessageAsync($"{game.DoMove(msg)}\n\n{game}");
+                await context.Channel.SendMessageAsync($"{game.DoMove(msg).Result}\n\n{game}");
             }
         }
 
